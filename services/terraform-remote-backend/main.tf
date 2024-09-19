@@ -64,10 +64,37 @@ resource "aws_s3_bucket_public_access_block" "public_access" {
   restrict_public_buckets = true
 }
 
+resource "aws_s3_bucket_lifecycle_configuration" "bucket_lifecycle" {
+  depends_on = [aws_s3_bucket_versioning.enabled]
+
+  bucket = aws_s3_bucket.terraform_state.id
+
+  rule {
+    id = "expire-versions"
+
+    noncurrent_version_expiration {
+      newer_noncurrent_versions = 3
+      noncurrent_days           = 90
+    }
+
+    noncurrent_version_transition {
+      noncurrent_days = 30
+      storage_class   = "STANDARD_IA"
+    }
+
+    noncurrent_version_transition {
+      noncurrent_days = 60
+      storage_class   = "GLACIER"
+    }
+
+    status = "Enabled"
+  }
+}
+
 ###### OUTPUTS ######
 output "s3_bucket_arn" {
   value       = aws_s3_bucket.terraform_state.arn
-    description = "The ARN of the S3 bucket"
+  description = "The ARN of the S3 bucket"
 }
 
 output "dynamodb_table_name" {
