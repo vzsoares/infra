@@ -40,7 +40,7 @@ resource "aws_s3_bucket_public_access_block" "public_access" {
   restrict_public_buckets = true
 }
 
-resource "aws_s3_bucket_lifecycle_configuration" "expire-old-versions" {
+resource "aws_s3_bucket_lifecycle_configuration" "bucket_lifecycle" {
   depends_on = [aws_s3_bucket_versioning.enabled]
 
   bucket = aws_s3_bucket.bucket.id
@@ -48,9 +48,13 @@ resource "aws_s3_bucket_lifecycle_configuration" "expire-old-versions" {
   rule {
     id = "expire-versions"
 
+    filter {
+      prefix = "build/"
+    }
+
     noncurrent_version_expiration {
-      newer_noncurrent_versions = 4
-      noncurrent_days = 90
+      newer_noncurrent_versions = 3
+      noncurrent_days           = 90
     }
 
     noncurrent_version_transition {
@@ -65,9 +69,36 @@ resource "aws_s3_bucket_lifecycle_configuration" "expire-old-versions" {
 
     status = "Enabled"
   }
+
+  rule {
+    id = "delete-old-cache"
+
+    filter {
+      prefix = "cache/"
+    }
+
+    expiration {
+      days = 30
+    }
+
+    status = "Enabled"
+  }
+  rule {
+    id = "delete-old-sam"
+
+    filter {
+      prefix = "sam/"
+    }
+
+    expiration {
+      days = 30
+    }
+
+    status = "Enabled"
+  }
 }
 
 output "s3_bucket_arn" {
   value       = aws_s3_bucket.bucket.arn
-    description = "The ARN of the S3 bucket"
+  description = "The ARN of the S3 bucket"
 }
