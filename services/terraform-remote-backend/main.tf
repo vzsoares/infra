@@ -9,7 +9,7 @@ variable "stage" {
 
 ###### DynamoDB ######
 resource "aws_dynamodb_table" "terraform_locks" {
-  name         = "terraform-iac-locks"
+  name         = "terraform-iac-locks-${var.stage}"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "LockID"
 
@@ -26,7 +26,7 @@ resource "aws_dynamodb_table" "terraform_locks" {
 
 ###### S3 ######
 resource "aws_s3_bucket" "terraform_state" {
-  bucket = "zenhalab-${var.stage}-terraform-iac"
+  bucket = "zenhalab-terraform-iac-${var.stage}"
 
   # Prevent accidental deletion of this S3 bucket
   lifecycle {
