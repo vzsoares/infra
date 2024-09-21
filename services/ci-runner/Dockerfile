@@ -4,11 +4,15 @@ ARG PRODUCT="terraform"
 ARG VERSION="1.9.3"
 
 # basic
-RUN apk add bash && \
-    apk add make && \
-    apk add zip && \
-    apk add docker && \
-    apk add git
+RUN apk add bash \
+    make \
+    zip \
+    docker \
+    git \
+    nodejs npm \
+    python3 \
+    py3-pip \
+    go
 
 # install terraform
 # https://developer.hashicorp.com/well-architected-framework/operational-excellence/verify-hashicorp-binary
@@ -24,13 +28,6 @@ RUN apk add --update --virtual .deps --no-cache gnupg && \
     mv /tmp/${PRODUCT} /usr/local/bin/${PRODUCT} && \
     rm -f /tmp/${PRODUCT}_${VERSION}_linux_amd64.zip ${PRODUCT}_${VERSION}_SHA256SUMS ${VERSION}/${PRODUCT}_${VERSION}_SHA256SUMS.sig && \
     apk del .deps
-
-# install node
-RUN apk add --update nodejs npm
-
-# install python
-RUN apk add python3 && \
-    apk add py3-pip
 
 # install aws cli
 RUN pip install --break-system-packages aws-sam-cli==1.121 && \
